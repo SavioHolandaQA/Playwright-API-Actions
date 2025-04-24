@@ -1,0 +1,40 @@
+name: Playwright API Tests
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    steps:
+    - name:  Checkout código
+      uses: actions/checkout@v4
+
+    - name: ⎔ Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name:  Instalar dependências
+      run: npm ci
+
+    - name:  Instalar Playwright (com dependências nativas mínimas)
+      run: npx playwright install --with-deps
+
+    - name:  Executar testes de API
+      run: |
+        npx playwright test tests/example.spec.js \
+          --workers=1 \
+          --reporter=html,line
+
+    - name:  Upload do Relatório de Testes
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-api-report
+        path: playwright-report/
+        retention-days: 30
